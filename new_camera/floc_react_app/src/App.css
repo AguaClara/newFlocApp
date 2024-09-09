@@ -1,0 +1,514 @@
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+/* Reset default margin and padding */
+body, html {
+  margin: 0;
+  padding: 0;
+}
+
+/* Apply a modern sans-serif font */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #ffffff; /* Light gray background color */
+}
+
+.headerBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 8%;
+  background-color: #ffffff; /* White background color */
+  overflow: hidden; /* Hide overflow */
+}
+
+.contentContainer {
+  background-color: #f0f0f0;
+  position: fixed;
+  top: 8%;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.pic {
+  outline: none;
+  border: none;
+  background-color: transparent;
+}
+
+.logoBox {
+  position: absolute;
+  height: 100%;
+  width: 30%;
+  display: flex;
+  justify-content: center; /* Centers content horizontally */
+  align-items: center;
+  box-shadow: inset 0px -5px 5px -5px rgba(0, 0, 0, 0.1);
+}
+
+.tabsBox {
+  position: absolute;
+  height: 100%;
+  width: 70%;
+  left: 30%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 11px;
+}
+
+/* Style for tabs */
+.cameraPageButton {
+  padding: 10px 20px;
+  margin: 0 5px;
+  width: 22%;
+  text-align: center;
+  background-color: #f6f6f6;
+  color: rgb(77, 75, 75);
+  border: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  box-shadow: 
+    inset 0px -5px 5px -5px rgba(0, 0, 0, 0.1), /* Inset shadow only along the bottom edge */
+    0px 5px 5px rgba(0, 0, 0, 0.1), /* Shadow on the top side */
+    -5px 0px 5px rgba(0, 0, 0, 0.1), /* Shadow on the left side */
+    5px 0px 5px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
+}
+.cameraPageButton.active {
+  background-color: #f0f0f0;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+.dataPageButton {
+  padding: 10px 20px;
+  margin-right: auto;
+  margin-left: auto;
+  width: 22%;
+  background-color: #f6f6f6;
+  color: rgb(77, 75, 75);
+  border: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  text-align: center;
+  transition: background-color 0.3s ease;
+  box-shadow: 
+    inset 0px -5px 5px -5px rgba(0, 0, 0, 0.1), /* Inset shadow only along the bottom edge */
+    0px 5px 5px rgba(0, 0, 0, 0.1), /* Shadow on the top side */
+    -5px 0px 5px rgba(0, 0, 0, 0.1), /* Shadow on the left side */
+    5px 0px 5px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
+}
+.dataPageButton.active {
+  background-color: #f0f0f0;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+.settingsPageButton {
+  padding: 10px 20px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 22%;
+  text-align: center;
+  background-color: #f6f6f6;
+  color: rgb(77, 75, 75);
+  border: none;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  box-shadow: 
+    inset 0px -5px 5px -5px rgba(0, 0, 0, 0.1), /* Inset shadow only along the bottom edge */
+    0px 5px 5px rgba(0, 0, 0, 0.1), /* Shadow on the top side */
+    -5px 0px 5px rgba(0, 0, 0, 0.1), /* Shadow on the left side */
+    5px 0px 5px rgba(0, 0, 0, 0.1); /* Shadow on the right side */
+}
+.settingsPageButton.active {
+  background-color: #f0f0f0;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+}
+.cameraBox {
+  position: fixed;
+  top: 20%;
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%);
+  background-color: #ffffff; /* White background color */
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); /* Add shadow for depth */
+  overflow: hidden; /* Hide overflow */
+}
+
+.controlsBox {
+  position: relative;
+  top: 80%;
+  width: 100%;
+}
+
+.cameraDropdownBox {
+  position: 'relative';
+  bottom: 43;
+  right: 0;
+  z-index: 15;
+}
+
+.exportBox {
+  position: fixed;
+  top: 85%;
+}
+
+.exportBox {
+  padding: 20px;
+}
+
+/* Style for webcam video */
+.video {
+  width: 100%;
+  max-width: 100%;
+}
+
+.flash-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  animation: flashEffect 1s linear;
+}
+
+@keyframes flashEffect {
+  0% { background-color: white; }
+  50% { background-color: transparent; }
+  100% { background-color: transparent; }
+}
+
+/* Style for buttons */
+.button {
+  padding: 5px 10px;
+  margin: 0 10px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e9e9e9;
+  color: rgb(0, 0, 0);
+  border: 1px solid black;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1); /* Add shadow for depth */
+  }
+
+.button:hover {
+  background-color: #dedede;
+}
+
+.clear {
+  opacity: 0.0;
+}
+
+.solid {
+  opacity: 1.0;
+}
+
+.countdown {
+  color:rgb(229, 18, 18);
+  font-size:100px;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top:20%;
+}
+
+.fileErrMsg {
+  text-align: center;
+  color: red;
+  font-style: italic;
+}
+
+.settingsContainer {
+  background-color: #f0f0f0;
+  position: fixed;
+  top: 8%;
+  width: 100%;
+  height: 100%;
+  border-top-right-radius: 5px;
+  border-top-right-radius: 5px;
+}
+
+.settingsHeader {
+  position: absolute;
+  top: 0%;
+  width: 100%;
+  height: 15%;
+}
+
+.infoHeader {
+  position: absolute;
+  top: 39%;
+  width: 100%;
+  height: 15%;
+}
+
+.settingsIcon {
+  position: absolute;
+  left: 26%;
+  top: 55%;
+  transform: translateY(-50%);
+}
+
+.infoIcon {
+  position: absolute;
+  left: 17%;
+  top: 55%;
+  transform: translateY(-50%);
+}
+
+.settingsLabel {
+  position: absolute;
+  left: 5%;
+  top:25%;
+  transform: translateY(-25%);
+}
+
+.infoBoxWrapper {
+  position: absolute;
+  top:53%;
+  left: 5%;
+  width: 86%;
+  height: 17%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+
+.infoBox {
+  position: absolute;
+  left: 5%;
+  width: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.infoButton {
+  width: 45%;
+  height:27%;
+  padding: 5px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  background-color:white;
+  border-radius: 5px;
+  margin-top: auto;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.infoButton:hover {
+  background-color:#f7f7f7
+}
+
+.infoButton:active {
+  background-color:#f1f1f1
+}
+
+.deleteButton {
+  color: red;
+  width: 45%;
+  height:27%;
+  padding: 5px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  background-color:white;
+  border-radius: 5px;
+  margin-top: auto;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.deleteButton:hover {
+  background-color:#f7f7f7
+}
+
+.deleteButton:active {
+  background-color:#f1f1f1
+}
+
+.settingsComponentBoxWrapper {
+  position: absolute;
+  top:14%;
+  left: 5%;
+  width: 86%;
+  height: 20%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+}
+.settingsComponentBox {
+  position: absolute;
+  left: 5%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.inputBox {
+  width: 150px;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+.buttonContainer {
+  position: fixed;
+  margin-top: 20px;
+  bottom: 20px;
+  right: 20px;
+}
+.appButton {
+  padding: 5px 10px;
+  margin: 0 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #e9e9e9;
+  color: rgb(0, 0, 0);
+  border: 1px solid black;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.3s;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+/* Style for Dashboard */
+
+.dashboardIcon {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+.dashboardBoxWrapper {
+  position: absolute;
+  top: 14%;
+  left: 5%;
+  width: 87%;
+  height: 73%;
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 5px;
+  background-color: #f9f9f9;
+  overflow-x: 'scroll';
+  white-space: 'nowrap';
+  margin-bottom: 0px;
+}
+
+.popupWrapper {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: gray;
+  opacity: 40%;
+}
+
+.popup {
+  position: absolute;
+  left: 20%;
+  top: 50%;
+  transform: translateX(-50%);
+  transform: translateY(-50%);
+  background-color: #f3f3f3;
+  width: 60%;
+  height: 20%;
+  border: 1px solid rgb(139, 139, 139);
+  border-radius: 3px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.popupMsg {
+  position: relative;
+  text-align: center;
+  top: 12%;
+}
+
+.popupButton {
+  position: relative;
+  left: 7%;
+  top: 20%;
+  width: 35%;
+  height:27%;
+  padding: 5px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  background-color:white;
+  border-radius: 5px;
+  margin-top: auto;
+  margin-left: 5%;
+  box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.popupButton:hover {
+  background-color:#f7f7f7
+}
+
+.popupButton:active {
+  background-color:#f1f1f1
+}
+
+.acInfoBox {
+  position: absolute;
+  left: 10%;
+  top: 20%;
+  background-color: #f3f3f3;
+  width: 80%;
+  height: 70%;
+  border: 1px solid rgb(139, 139, 139);
+  border-radius: 3px;
+  box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+}
+
+.acMsg {
+  position: relative;
+  text-align: center;
+  margin: 5px;
+  font-size:17px;
+  width: 80%;
+  left:10%;
+  top: 24%;
+}
+
+.appMsg {
+  position: relative;
+  text-align: center;
+  margin: 5px;
+  font-size:17px;
+  width: 80%;
+  left:10%;
+  top:10%;
+  overflow: auto;
+}
+
+.closeButton {
+  position: absolute;
+  left: 94%;
+  top: 1.5%;
+}
+
+.logo_img {
+  position: absolute;
+  left: 25%;
+  top: 4%;
+}
