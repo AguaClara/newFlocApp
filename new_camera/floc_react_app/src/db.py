@@ -24,7 +24,8 @@ class Floc(Base):
 def start():
     engine = create_engine('sqlite:///floc.db')
     Base.metadata.create_all(engine)
-    session = sessionmaker(bind=engine)()
+    Session = sessionmaker(bind=engine, expire_on_commit=False)
+    session = Session()
     return session
 
 class DatabaseOperations:

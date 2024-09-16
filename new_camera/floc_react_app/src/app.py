@@ -8,7 +8,6 @@ import os
 import random
 import size
 
-
 # from electron import app, dialog, ipcMain
 
 
@@ -180,6 +179,49 @@ def get_last_n_images():
 #     selected_path = result["filePaths"][0] if result.get("filePaths") else None
 #     print("Selected Path (main process):", selected_path)
 #     return selected_path
+
+@app.route("/images/", methods=["POST"])
+def process_image():
+    # Get the image path from the request arguments
+    image_path = request.json.get("image_path")
+
+    if not image_path:
+        return jsonify({"message": "No image path provided"}), 400
+
+    # Check if the provided image path is valid
+    if not os.path.isfile(image_path):
+        return jsonify({"message": "Image not found"}), 404
+
+    # Get the image name from the path
+    image_name = os.path.basename(image_path)
+
+    # Convert the image to base64
+    with open(image_path, "rb") as image_file:
+        image_base64_data = base64.b64encode(image_file.read()).decode('utf-8')
+
+    # Check if image is not already in the set of processed images
+    session = start()
+    db_ops = DatabaseOperations(session)
+    processed_images = db_ops.session.query(Image).all()
+    processed_image_names = [image.name for image in processed_images]
+    if image_name in processed_image_names:
+        db_ops.close()
+        return jsonify({"message": "Image already processed"}), 200
+
+    # Run the sizing script on the image and save in db
+    # Assuming size.size_image returns a dictionary with size info
+    size_info = size.size_image(image_path, session, db_ops)
+
+    # Save the image and its size in the database
+    new_image = db_ops.add_image(image_name, image_base64_data)
+    session.commit()
+    db_ops.close()
+
+    return jsonify({
+        "message": "Image processed and saved in database",
+        "image_id": new_image.id,
+        "size_info": size_info  # Include the size information in the response
+    }), 200
 
 @app.route("/images/", methods = ["GET"])
 def dev_image_tester():
