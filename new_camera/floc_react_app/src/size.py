@@ -2,8 +2,13 @@
 from ultralytics import YOLO
 import numpy as np
 import db
+import os
 
-MODEL_FILE_PATH = "/Users/sahilhosalli/AguaClara/FlocApp/new_camera/floc_react_app/src/model.pt"
+current_directory = os.path.dirname(os.path.abspath(__file__))
+
+filename = "model.pt"
+
+MODEL_FILE_PATH = os.path.join(current_directory, filename)
 model = YOLO(MODEL_FILE_PATH)
 
 def size_image(img_path, session, db_ops):
