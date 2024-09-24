@@ -19,6 +19,5 @@ def size_image(img_path, session, db_ops):
   length = len(predict[0].masks.data)
   for i in range(length):
     mask = (predict[0].masks.data[i].numpy() * 255).astype("uint8")
-    print(mask)
     size = np.sum(mask == 255)
     db_ops.add_floc(img_id, size)

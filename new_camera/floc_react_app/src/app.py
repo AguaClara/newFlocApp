@@ -73,7 +73,7 @@ def get_specific_image_data(image_id):
 @app.route("/upload", methods=["POST"])
 def upload_image():
     """
-    Uploads an image to database
+    Uploads an image to the database and sizes the image.
     """
     body = json.loads(request.data)
     image_base64_data = body.get("image")
@@ -95,6 +95,7 @@ def upload_image():
 
     if filePath is None:
         return jsonify({"error": "No file path provided"}), 400
+
     session = start()
     db_ops = DatabaseOperations(session)
     current_id = db_ops.get_current_image_id()
@@ -103,21 +104,31 @@ def upload_image():
         image_name = "image0"
     else:
         image_name = f"image{current_id+1}"
-    
-
 
     filePath = filePath + "/" + image_name + ".jpeg"
     if "," in image_base64_data:
         image_base64_data = image_base64_data.split(",")[1]
     image_data = base64.b64decode(image_base64_data)
+    
+    # Save the image to disk
     with open(filePath, "wb") as file:
         file.write(image_data)
+
+    # Add image to the database
     new_image = db_ops.add_image(image_name, image_base64_data)
 
-    response = {"message": "Image uploaded", "image_id": new_image.id}
+    # Size the image using the size script
+    size_info = size.size_image(filePath, session, db_ops)
 
+    # Commit the new image to the database
     session.commit()
     db_ops.close()
+
+    response = {
+        "message": "Image uploaded and sized",
+        "image_id": new_image.id,
+        "size_info": size_info  # Include the size information in the response
+    }
 
     return jsonify(response), 200
 
