@@ -9,9 +9,6 @@ import os
 import random
 import size
 
-# from electron import app, dialog, ipcMain
-
-
 # Set up app and database
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///floc.db"
@@ -19,57 +16,6 @@ db = SQLAlchemy(app)
 CORS(app)
 
 # Routes
-
-
-@app.route("/test", methods=["GET"])
-def hello_world():
-    return {"message": "Hello, World from Flask!"}
-
-
-@app.route("/images/", methods=["GET"])
-def get_images_data():
-    """
-    Gets all image data in database
-    """
-    session = start()
-    db_ops = DatabaseOperations(session)
-    images = db_ops.session.query(Image).all()
-    image_list = []
-    for image in images:
-        image_dict = {
-            "id": image.id,
-            "name": image.name,
-            "image": image.base64_data,
-            "flocs": [{"id": floc.id, "size": floc.size} for floc in image.flocs],
-        }
-        image_list.append(image_dict)
-
-    db_ops.close()
-    return jsonify(image_list), 200
-
-
-@app.route("/images/<int:image_id>/data/", methods=["GET"])
-def get_specific_image_data(image_id):
-    """
-    Gets the image data at for the specified image id
-    """
-    session = start()
-    db_ops = DatabaseOperations(session)
-    image = db_ops.session.query(Image).filter_by(id=image_id).first()
-
-    if not image:
-        return jsonify({"error": "Image not found"}), 404
-
-    image_data = {
-        "id": image.id,
-        "name": image.name,
-        "image": image.base64_data,
-        "flocs": [{"id": floc.id, "size": floc.size} for floc in image.flocs],
-    }
-
-    db_ops.close()
-    return jsonify(image_data), 200
-
 @app.route("/upload", methods=["POST"])
 def upload_image():
     """
@@ -132,6 +78,48 @@ def upload_image():
 
     return jsonify(response), 200
 
+@app.route("/images/", methods=["GET"])
+def get_images_data():
+    """
+    Gets all image data in database
+    """
+    session = start()
+    db_ops = DatabaseOperations(session)
+    images = db_ops.session.query(Image).all()
+    image_list = []
+    for image in images:
+        image_dict = {
+            "id": image.id,
+            "name": image.name,
+            "image": image.base64_data,
+            "flocs": [{"id": floc.id, "size": floc.size} for floc in image.flocs],
+        }
+        image_list.append(image_dict)
+
+    db_ops.close()
+    return jsonify(image_list), 200
+
+@app.route("/images/<int:image_id>/data/", methods=["GET"])
+def get_specific_image_data(image_id):
+    """
+    Gets the image data at for the specified image id
+    """
+    session = start()
+    db_ops = DatabaseOperations(session)
+    image = db_ops.session.query(Image).filter_by(id=image_id).first()
+
+    if not image:
+        return jsonify({"error": "Image not found"}), 404
+
+    image_data = {
+        "id": image.id,
+        "name": image.name,
+        "image": image.base64_data,
+        "flocs": [{"id": floc.id, "size": floc.size} for floc in image.flocs],
+    }
+
+    db_ops.close()
+    return jsonify(image_data), 200
 
 @app.route("/images/<int:image_id>/", methods=["GET"])
 def get_image(image_id):
@@ -149,8 +137,6 @@ def get_image(image_id):
     db_ops.close()
 
     return jsonify(response), 200
-
-from sqlalchemy import func
 
 @app.route("/images/floc_sum", methods=["GET"])
 def get_sum_of_floc_areas():
@@ -182,6 +168,66 @@ def get_sum_of_floc_areas():
     
     return jsonify({"sum_floc_areas": floc_sums}), 200
 
+@app.route("/images/floc_areas", methods=["GET"])
+def get_floc_areas():
+    """
+    Gets the floc areas for each of the last n images as an array of arrays
+    """
+    body = json.loads(request.data)
+    n = body.get("limit")
+    
+    if not n or not isinstance(n, int) or n <= 0:
+        return jsonify({"error": "Invalid limit value provided."}), 400
+
+    session = start()
+    db_ops = DatabaseOperations(session)
+
+    # Query the last n images
+    images = db_ops.session.query(Image).order_by(Image.id.desc()).limit(n).all()
+    if not images:
+        db_ops.close()
+        return jsonify({"error": "No images found."}), 404
+
+    # Get the floc areas for each of the last n images
+    floc_areas = []
+    for image in images:
+        flocs = db_ops.session.query(Floc.size).filter(Floc.image_id == image.id).all()
+        floc_areas.append([floc.size for floc in flocs])
+
+    db_ops.close()
+    
+    return jsonify({"floc_areas": floc_areas}), 200
+
+@app.route("/images/floc_count", methods=["GET"])
+def get_floc_count():
+    """
+    Gets the total number of flocs for each of the last n images
+    """
+    body = json.loads(request.data)
+    n = body.get("limit")
+    
+    if not n or not isinstance(n, int) or n <= 0:
+        return jsonify({"error": "Invalid limit value provided."}), 400
+
+    session = start()
+    db_ops = DatabaseOperations(session)
+
+    # Query the last n images
+    images = db_ops.session.query(Image).order_by(Image.id.desc()).limit(n).all()
+    if not images:
+        db_ops.close()
+        return jsonify({"error": "No images found."}), 404
+
+    # Get the total number of flocs for each of the last n images
+    floc_counts = []
+    for image in images:
+        floc_count = db_ops.session.query(func.count(Floc.id)).filter(Floc.image_id == image.id).scalar()
+        floc_counts.append(floc_count if floc_count else 0)
+
+    db_ops.close()
+    
+    return jsonify({"floc_counts": floc_counts}), 200
+
 @app.route("/images/latest", methods=["GET"])
 def get_last_n_images():
     """
@@ -203,93 +249,6 @@ def get_last_n_images():
         image_list.append(image_dict)
     db_ops.close()
     return jsonify(image_list), 200
-
-
-# @app.expose
-# def choose_path():
-#     print("choose_path called")
-#     options = {
-#         "title": "Select Save Location",
-#         "properties": ["openDirectory"],
-#     }
-
-#     # Show the directory selection dialog
-#     result = dialog.showOpenDialog(options)
-#     print(result)
-
-#     # Return the selected path to the renderer process
-#     selected_path = result["filePaths"][0] if result.get("filePaths") else None
-#     print("Selected Path (main process):", selected_path)
-#     return selected_path
-
-@app.route("/images/", methods=["POST"])
-def process_image():
-    # Get the image path from the request arguments
-    image_path = request.json.get("image_path")
-
-    if not image_path:
-        return jsonify({"message": "No image path provided"}), 400
-
-    # Check if the provided image path is valid
-    if not os.path.isfile(image_path):
-        return jsonify({"message": "Image not found"}), 404
-
-    # Get the image name from the path
-    image_name = os.path.basename(image_path)
-
-    # Convert the image to base64
-    with open(image_path, "rb") as image_file:
-        image_base64_data = base64.b64encode(image_file.read()).decode('utf-8')
-
-    # Check if image is not already in the set of processed images
-    session = start()
-    db_ops = DatabaseOperations(session)
-    processed_images = db_ops.session.query(Image).all()
-    processed_image_names = [image.name for image in processed_images]
-    if image_name in processed_image_names:
-        db_ops.close()
-        return jsonify({"message": "Image already processed"}), 200
-
-    # Run the sizing script on the image and save in db
-    # Assuming size.size_image returns a dictionary with size info
-    size_info = size.size_image(image_path, session, db_ops)
-
-    # Save the image and its size in the database
-    new_image = db_ops.add_image(image_name, image_base64_data)
-    session.commit()
-    db_ops.close()
-
-    return jsonify({
-        "message": "Image processed and saved in database",
-        "image_id": new_image.id,
-        "size_info": size_info  # Include the size information in the response
-    }), 200
-
-@app.route("/images/", methods = ["GET"])
-def dev_image_tester():
-    # randomly take an image from the images folder
-    image_folder = "../images"
-    image_files = os.listdir(image_folder)
-    random_image = random.choice(image_files)
-
-    # check if image is not already in the set of processed images
-    session = start()
-    db_ops = DatabaseOperations(session)
-    processed_images = db_ops.session.query(Image).all()
-    processed_image_names = [image.name for image in processed_images]
-    if random_image in processed_image_names:
-        return jsonify({"message": "Image already processed"}), 200
-
-    # run sizing script (size.py) on image and save in db
-    image_path = os.path.join(image_folder, random_image)
-    # Run the sizing script on the image and get the size
-    size.size_image(image_path, session, db_ops)
-    # Save the image and its size in the database
-    new_image = db_ops.add_image(random_image, size)
-    session.commit()
-    db_ops.close()
-
-    return jsonify({"message": "Image processed and saved in database", "image_id": new_image.id}), 200
 
 @app.route("/images/<int:image_id>/", methods=["DELETE"])
 def delete_image(image_id):
