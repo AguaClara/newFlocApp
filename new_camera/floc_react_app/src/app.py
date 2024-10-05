@@ -2,6 +2,7 @@ import json
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from db import Image, Floc, DatabaseOperations, start
 import base64
 import os
@@ -68,7 +69,6 @@ def get_specific_image_data(image_id):
 
     db_ops.close()
     return jsonify(image_data), 200
-
 
 @app.route("/upload", methods=["POST"])
 def upload_image():
@@ -150,6 +150,37 @@ def get_image(image_id):
 
     return jsonify(response), 200
 
+from sqlalchemy import func
+
+@app.route("/images/floc_sum", methods=["GET"])
+def get_sum_of_floc_areas():
+    """
+    Gets the sum of floc areas for each of the last n images
+    """
+    body = json.loads(request.data)
+    n = body.get("limit")
+    
+    if not n or not isinstance(n, int) or n <= 0:
+        return jsonify({"error": "Invalid limit value provided."}), 400
+
+    session = start()
+    db_ops = DatabaseOperations(session)
+
+    # Query the last n images
+    images = db_ops.session.query(Image).order_by(Image.id.desc()).limit(n).all()
+    if not images:
+        db_ops.close()
+        return jsonify({"error": "No images found."}), 404
+
+    # Calculate the sum of floc areas for each of the last n images
+    floc_sums = []
+    for image in images:
+        floc_sum = db_ops.session.query(func.sum(Floc.size)).filter(Floc.image_id == image.id).scalar()
+        floc_sums.append(floc_sum if floc_sum else 0)
+
+    db_ops.close()
+    
+    return jsonify({"sum_floc_areas": floc_sums}), 200
 
 @app.route("/images/latest", methods=["GET"])
 def get_last_n_images():
