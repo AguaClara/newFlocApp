@@ -106,7 +106,6 @@ function App(props) {
       setFileError(false);
       capture();
 
-      setCountdown(count_array[count_idx]);
       // Start auto-capture mode
       const intervalId = setInterval(() => {
         const imageSrc = webcamRef.current.getScreenshot();
@@ -138,7 +137,6 @@ function App(props) {
         else {
           count_idx = 1;
         }
-        setCountdown(count_array[count_idx]);
         setFlashing(prevFlashing => !prevFlashing);
       }, 500);
       setFlashingInterval(flashIntervalId);
